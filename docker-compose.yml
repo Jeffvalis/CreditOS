@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: creditos
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: creditos
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U creditos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Run Prisma migrations on startup
+  db-migration:
+    build: .
+    command: >
+      sh -c "npx prisma db push --schema=services/identity-kyc/prisma/schema.prisma && npx prisma db push --schema=services/core-ledger-loan/prisma/schema.prisma"
+    environment:
+      DATABASE_URL: "postgresql://creditos:password@postgres:5432/creditos?schema=public"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  gateway:
+    build: .
+    command: npm run start:gateway
+    ports:
+      - "8000:8000"
+    environment:
+      IDENTITY_KYC_SERVICE_URL: "http://identity-kyc:8001"
+      DECISION_ENGINE_SERVICE_URL: "http://decision-engine:8002"
+      PAYMENT_PROCESSING_SERVICE_URL: "http://payment-processing:8003"
+      CORE_LEDGER_SERVICE_URL: "http://core-ledger:8004"
+    depends_on:
+      - identity-kyc
+      - decision-engine
+      - payment-processing
+      - core-ledger
+
+  identity-kyc:
+    build: .
+    command: npm run start:kyc
+    environment:
+      PORT: 8001
+      DATABASE_URL: "postgresql://creditos:password@postgres:5432/creditos?schema=public"
+      ENCRYPTION_KEY: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-migration:
+        condition: service_completed_successfully
+
+  decision-engine:
+    build: .
+    command: npm run start:decision
+    environment:
+      PORT: 8002
+
+  payment-processing:
+    build: .
+    command: npm run start:payment
+    environment:
+      PORT: 8003
+      PAYSTACK_SECRET_KEY: "sk_test_fake_key_for_e2e"
+      WEBHOOK_SECRET: "fake_webhook_secret"
+
+  core-ledger:
+    build: .
+    command: npm run start:ledger
+    environment:
+      PORT: 8004
+      DATABASE_URL: "postgresql://creditos:password@postgres:5432/creditos?schema=public"
+      REDIS_URL: "redis://redis:6379"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-migration:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:

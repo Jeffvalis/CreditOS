@@ -1,0 +1,357 @@
+ 2. GOALS & SUCCESS METRICS 
+ 
+●  Handles disbursement, repayment, and reporting 
+●  Offers flexible installment plans 
+●  Scores creditworthiness using alternative data 
+●  Verifies users instantly 
+A real-time credit infrastructure layer that: 
+Solution: 
+●  Existing lending solutions are slow, fragmented, or require leaving checkout. 
+●  Merchants lose sales due to lack of financing options. 
+●  Many Nigerian consumers cannot afford high-value purchases upfront. 
+Problem Statement: 
+API, increasing conversion rates while managing credit risk intelligently. 
+Empower merchants to offer instant, embedded credit at checkout through a plug-and-play 
+Vision: 
+Credit OS (Lendr) 
+Product Name: 
+吝 1. PRODUCT OVERVIEW 
+ 
+REQUIREMENTS DOCUMENT 
+ CREDIT OS (LENDR) — PRODUCT 
+----------------Page (0) Break----------------
+4. Credit scoring 
+3. Bank data aggregation 
+2. Identity verification (BVN/NIN) 
+1. Customer selects “Buy with Lendr” 
+ 4. HIGH-LEVEL USER FLOW 
+ 
+“I want to control risk, monitor loans, and ensure compliance.” 
+Lendr Ops 
+“I want to split payments easily without stress or leaving checkout.” 
+Borrower 
+“I want to embed a credit option so I can increase sales.” 
+Merchant 
+ 3. USER PERSONAS 
+ 
+●  W ebhook delivery success rate 
+●  Time to decision (< 500ms for scoring) 
+●  Repayment success rate 
+●  Default rate (30+ days overdue) 
+●  Loan approval rate 
+Product Metrics: 
+●  Achieve < 5 seconds checkout decision time 
+●  Maintain default rate < 8% 
+●  Increase merchant conversion rate by 20–40% 
+Business Goals: 
+----------------Page (1) Break----------------
+ 
+D   <45   Reject / micro-loan 
+downpayment 
+C   45–59  40–50% 
+B   60–74  20% downpayment 
+A   75–100  0–10% downpayment 
+Tier  Score      Terms 
+Tier Logic: 
+●  Terms 
+●  Loan Limit 
+●  Risk Tier (A–D) 
+●  Score (0–100) 
+Decision Output: 
+●  Stability (15 pts) 
+●  Behavioral Signals (20 pts) 
+●  Credit History (25 pts) 
+●  Capacity Score (40 pts) 
+●  Identity Gate (Hard Reject) 
+Structure: 
+易 5. CREDIT DECISION ENGINE 
+ 
+8. Repayment cycle begins 
+7. Loan disbursed to merchant 
+6. User accepts + pays deposit 
+5. Offer generation 
+----------------Page (2) Break----------------
+●  < 2x → 0 pts 
+●  ≥ 2x → 10 pts 
+●  ≥ 3x → 15 pts 
+●  Avg monthly inflow ≥ 4x installment → 20 pts 
+A. Income Strength (20 pts) 
+Metrics: 
+Using Okra / Mono 
+  CAPACITY SCORE (40 POINTS) 
+ 
+●  Device fingerprint reused across accounts 
+ 
+ 
+●  3 loan attempts in 24hrs 
+Fraud signals: 
+●  Blacklisted user 
+●  Active default 
+From CRC Credit Bureau / First Central Credit Bureau: 
+●  NIN verification fails (if required) 
+From National Identity Management Commission: 
+●  DOB mismatch 
+●  Phone not linked to BVN 
+●  BVN name mismatch 
+From Dojah: 
+If ANY of these hit → AUTO REJECT 
+scoring) 
+HARD REJECTION LAYER (Before 
+----------------Page (3) Break----------------
+ 
+ 
+ 
+●  3 loans → 0 pts 
+●  2–3 loans → 5 pts 
+●  0–1 loans → 10 pts 
+B. Active Loans (10 pts) 
+ 
+●  Frequent late → 3 pts 
+●  1–2 late payments → 8 pts 
+●  No missed payments → 15 pts 
+A. Repayment History (15 pts) 
+From CRC Credit Bureau / First Central Credit Bureau 
+CREDIT HISTORY SCORE (25 POINTS) 
+ 
+ 
+ 
+●  70% → 0 pts 
+●  50–70% → 5 pts 
+●  Expenses < 50% income → 10 pts 
+C. Expense Pressure (10 pts) 
+ 
+●  Irregular inflow → 3 pts 
+●  2 months → 7 pts 
+●  Salary detected ≥ 3 months → 10 pts 
+B. Income Consistency (10 pts) 
+ 
+----------------Page (4) Break----------------
+●  <6 months → 0 pts 
+●  6–12 months → 4 pts 
+ 
+ 
+●  1 year → 7 pts 
+A. Account Age (7 pts) 
+STABILITY SCORE (15 POINTS) 
+ 
+●  Dormant → 0 pts 
+●  Sparse → 2 pts 
+●  Daily/weekly activity → 5 pts 
+C. Transaction Activity (5 pts) 
+ 
+ 
+ 
+●  30% → 0 pts 
+●  <10% inflow → 2 pts 
+●  No betting transactions → 5 pts 
+B. Gambling Risk (5 pts) 
+ 
+ Proxy for financial discipline 
+●  None → 0 pts 
+●  Occasional → 5 pts 
+●  Frequent small payments → 10 pts 
+A. Airtime / Small Payments (10 pts) 
+From bank + inferred patterns: 
+BEHAVIORAL SCORE (20 POINTS) 
+----------------Page (5) Break----------------
+Tier B 
+ 
+●  Low interest 
+●  3–4 months tenor 
+●  0–10% downpayment 
+Tier A 
+ 9. OFFER GENERATION LOGIC 
+ 
+<45   D   Reject 
+45–59  C   Approve (High downpayment) 
+60–74  B   Approve (Moderate risk) 
+75–100  A   Approve (Best terms) 
+Score  Tier        Decision 
+ 8. DECISION TIERS (ACTUAL OUTPUT) 
+ 
+(Max = 100) 
+Total Score = Capacity + Credit + Behavioral + Stability 
+FINAL SCORE CALCULATION 
+ 
+●  Unknown → 0 pts 
+●  Changing frequently → 3 pts 
+●  Same employer ≥ 6 months → 8 pts 
+B. Employer Consistency (8 pts) 
+ 
+----------------Page (6) Break----------------
+●  W orker Layer 
+●  Core Database 
+●  Payment Service 
+●  Decision Engine 
+●  Identity/KYC Service 
+●  API Gateway 
+Core Components: 
+ 7. SYSTEM ARCHITECTURE 
+ 
+●  Merchant fraud → escrow + delayed settlement 
+●  Payment failure → retry + state management 
+●  Multiple accounts → aggregate data 
+●  No credit history → rely on behavioral scoring 
+●  Missing bank data → fallback estimation 
+⚠ 6. EDGE CASE HANDLING 
+ 
+ 
+●  Offer micro-loan (₦10k test loan) 
+●  Reject OR 
+Tier D 
+ 
+●  1–2 months 
+●  40–50% downpayment 
+Tier C 
+ 
+●  2–3 months 
+●  20% downpayment 
+----------------Page (7) Break----------------
+●  immutable records 
+●  reference_id 
+●  amount 
+●  debit/credit 
+●  transaction_type 
+Ledger (Source of Truth) 
+●  status 
+●  due_date, amount_due, amount_paid 
+●  loan_id, installment_number 
+Repayments 
+●  start_date, end_date 
+●  status, risk_tier 
+●  principal, interest, tenor 
+●  id, user_id, merchant_id 
+Loans 
+●  kyc_status, risk_flag 
+●  bvn (encrypted), nin (encrypted) 
+●  id, name, email, phone 
+Users 
+茶 8. DATABASE SCHEMA 
+ 
+●  Fail-safe integrations 
+●  Idempotent APIs 
+●  Async processing via events 
+●  Modular monolith (Phase 1) 
+Design Principles: 
+●  Notification Service 
+----------------Page (8) Break----------------
+●  Retry logic (exponential backoff) 
+Features: 
+●  loan.defaulted 
+●  payment.failed 
+●  loan.disbursed 
+●  loan.approved 
+Events Sent: 
+Notify merchants of real-time loan/payment updates 
+Purpose: 
+ 10. WEBHOOK SYSTEM 
+ 
+○  W ebhooks 
+○  Notifications 
+○  Loans 
+○  Ledger 
+●  Consumers: 
+●  Message queue 
+●  Event producers (API, payments) 
+Architecture: 
+●  repayment.due / paid / overdue 
+●  payment.successful / failed 
+●  loan.created / approved / disbursed / defaulted 
+Core Events: 
+⚡ 9. EVENT SYSTEM 
+ 
+----------------Page (9) Break----------------
+ 
+●  Automated alerts 
+●  Reference-based matching 
+●  Immutable ledger 
+Strategy: 
+●  Detect mismatches 
+●  Internal ledger vs payment provider 
+Daily Checks: 
+ 12. RECONCILIATION SYSTEM 
+ 
+●  Trigger notifications 
+●  Mark overdue 
+●  Retry (3x) 
+Failure Handling: 
+●  Bank debit fallback 
+●  Card auto-debit 
+Repayment: 
+●  Transfer to merchant account 
+Disbursement: 
+ 11. PAYMENT SYSTEM 
+ 
+●  Signature verification (HMAC) 
+●  Idempotency via event_id 
+----------------Page (10) Break----------------
+ 
+●  Restructuring offers 
+●  Reminders 
+Actions: 
+●  Behavioral anomalies 
+●  Income changes 
+●  Payment delays 
+Early Warning Signals: 
+●  Dynamic risk adjustment 
+During Loan: 
+●  Tier-based limits 
+●  Strict scoring 
+Before Disbursement: 
+ 14. RISK & ANTI-DEFAULT STRATEGY 
+ 
+●  Report all loans (good & bad repayment behavior) 
+Credit Reporting: 
+●  Transparent loan terms (APR, fees) 
+●  Secure storage of BVN/NIN 
+●  User consent for data access 
+Requirements: 
+ 13. COMPLIANCE & REGULATION 
+----------------Page (11) Break----------------
+●  Modular monolith architecture 
+●  Rule-based scoring (Phase 1) 
+易 17. KEY PRODUCT DECISIONS 
+ 
+●  Access control 
+●  W ebhook signing 
+●  Encryption (PII) 
+Security: 
+●  Retry mechanisms 
+●  99.9% uptime target 
+Reliability: 
+●  < 5s total checkout 
+●  < 500ms scoring 
+Performance: 
+REQUIREMENTS 
+⚙ 16. NON-FUNCTIONAL 
+ 
+●  POST /v1/repayments 
+●  POST /v1/loans 
+●  GET /v1/offers 
+●  POST /v1/verify 
+●  POST /v1/checkouts 
+Core Endpoints: 
+ 15. API DESIGN (HIGH-LEVEL) 
+----------------Page (12) Break----------------
+ 
+●   
+●  Real-world Nigerian constraints 
+●  Explainability 
+●  Scalability 
+Credit OS is not just a lending product—it is a financial infrastructure layer designed for: 
+ FINAL NOTE 
+ 
+●  Embedded finance SDK 
+●  BNPL marketplace 
+●  Cross-platform credit identity 
+Phase 3: 
+●  Loan stacking detection 
+●  Dynamic credit limits 
+●  ML-based fraud detection 
+Phase 2: 
+ 18. FUTURE ROADMAP 
+ 
+●  Event-driven system for scalability 
+●  Escrow model for merchants 
+●  Paystack-first payment integration 
+----------------Page (13) Break----------------

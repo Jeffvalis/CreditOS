@@ -1,0 +1,252 @@
+{
+  "info": {
+    "_postman_id": "b3e0239b-e85b-432d-986d-000000000000",
+    "name": "CreditOS (Lendr) API",
+    "description": "Postman Collection for the CreditOS Embedded Credit Platform API. Groups routes logically and uses dynamic variables to carry context (like userId and loanId) across requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. KYC & Identity",
+      "item": [
+        {
+          "name": "Verify Identity",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.userId) {",
+                  "    pm.environment.set(\"userId\", jsonData.userId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"08012345678\",\n  \"bvn\": \"12345678901\",\n  \"nin\": \"98765432109\",\n  \"deviceFingerprint\": \"device_abc123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/verify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "verify"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Decision & Checkout",
+      "item": [
+        {
+          "name": "Retrieve Credit Offers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.decision && jsonData.decision.tier) {",
+                  "    pm.environment.set(\"offerTier\", jsonData.decision.tier);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"cartValue\": 50000,\n  \"bankData\": {\n    \"monthlyIncome\": 200000,\n    \"existingDebt\": 10000,\n    \"missedPayments\": 0,\n    \"accountAgeMonths\": 24,\n    \"isSalaryAccount\": true\n  },\n  \"bureauData\": {\n    \"score\": 750,\n    \"hasDefaults\": false\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/offers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "offers"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Initiate Checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/checkouts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "checkouts"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Payments & Ledger",
+      "item": [
+        {
+          "name": "Initiate Disbursement",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.loanId) {",
+                  "    pm.environment.set(\"loanId\", jsonData.loanId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"merchantId\": \"merch_xyz123\",\n  \"offerId\": \"off_abc987\",\n  \"principal\": 50000,\n  \"interest\": 5000,\n  \"tenor\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/loans",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "loans"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Process Repayment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanId\": \"{{loanId}}\",\n  \"amount\": 18333,\n  \"paymentMethod\": \"CARD\",\n  \"transactionReference\": \"txn_123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/repayments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "repayments"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "value",
+        "value": "{{secret_key}}",
+        "type": "string"
+      },
+      {
+        "key": "key",
+        "value": "X-Lendr-Secret-Key",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "secret_key",
+      "value": "sk_test_demo123"
+    }
+  ]
+}

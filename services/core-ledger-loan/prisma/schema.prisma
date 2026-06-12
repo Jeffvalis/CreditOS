@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Loan {
+  id          String      @id @default(uuid())
+  user_id     String
+  merchant_id String
+  principal   Float
+  interest    Float
+  tenor       Int
+  status      String      @default("PENDING") // PENDING, ACTIVE, COMPLETED, DEFAULTED
+  risk_tier   String
+  start_date  DateTime?
+  end_date    DateTime?
+  repayments  Repayment[]
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+}
+
+model Repayment {
+  id                 String   @id @default(uuid())
+  loan_id            String
+  installment_number Int
+  due_date           DateTime
+  amount_due         Float
+  amount_paid        Float    @default(0.0)
+  status             String   @default("UNPAID") // UNPAID, PARTIAL, PAID
+  loan               Loan     @relation(fields: [loan_id], references: [id])
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+}
+
+model Ledger {
+  id               String   @id @default(uuid())
+  reference_id     String   // E.g., loan_id or repayment_id
+  amount           Float
+  debit_credit     String   // DEBIT or CREDIT
+  transaction_type String   // DISBURSEMENT, REPAYMENT, FEE
+  created_at       DateTime @default(now())
+}
