@@ -4,6 +4,27 @@ CreditOS is a high-performance, event-driven **Embedded Credit Infrastructure** 
 
 ## 🏗 System Architecture
 
+```mermaid
+graph TD
+    Gateway["API GATEWAY / PROXY"]
+    
+    KYC["Identity/KYC Service<br>(CRC, Dojah, NIMC)"]
+    Decision["Decision Engine Service"]
+    Payment["Payment Service<br>(Paystack)"]
+    
+    Gateway --> KYC
+    Gateway --> Decision
+    Gateway --> Payment
+    
+    Events(("Async Events<br>e.g., loan.disbursed"))
+    
+    KYC --> Events
+    Decision --> Events
+    Payment --> Events
+    
+    Events --> Ledger["Ledger & Core Loan Service"]
+```
+
 The backend is composed of four strictly typed Node.js microservices, orchestrated via an API Gateway and communicating asynchronously through a Redis Event Stream.
 
 ### Core Microservices:
