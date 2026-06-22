@@ -7,7 +7,8 @@ Build a plug-and-play API platform enabling merchants to offer instant, embedded
 
 ### 2.1 Core Modules (Modular Monolith)
 *   **Identity/KYC Module**: Handles BVN/NIN verification via external APIs (e.g., Dojah/NIMC).
-*   **Bank Data Aggregation Module**: Integrates with financial data providers (e.g., Mono/Okra) for statement parsing.
+*   **Bank Data Aggregation Module**: Integrates with financial data providers (e.g., Mono/Okra) for automated statement parsing.
+    *   *Manual Verification Fallback*: Supports `multipart/form-data` PDF Bank Statement uploads, utilizing in-memory parsing (`pdf2json`) and keyword extraction to instantly simulate open banking data for credit scoring.
 *   **Credit Decision Engine**: Implements the 100-point scoring algorithm:
     *   Capacity (40 pts)
     *   Credit History (25 pts)

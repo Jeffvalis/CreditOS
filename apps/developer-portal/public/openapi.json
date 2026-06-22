@@ -1,0 +1,293 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CreditOS (Lendr) API",
+    "version": "1.0.0",
+    "description": "API documentation for the CreditOS Embedded Credit Platform",
+    "contact": {
+      "name": "CreditOS Support"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Development Gateway"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Lendr-Secret-Key"
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/verify": {
+      "post": {
+        "summary": "Verify User Identity (BVN/NIN)",
+        "description": "Validates a user's identity details and device fingerprint via the Identity-KYC service.",
+        "tags": [
+          "Identity"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "email",
+                  "phone",
+                  "bvn",
+                  "nin",
+                  "deviceFingerprint"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "bvn": {
+                    "type": "string"
+                  },
+                  "nin": {
+                    "type": "string"
+                  },
+                  "deviceFingerprint": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Identity verified successfully"
+          },
+          "400": {
+            "description": "Bad request / missing fields"
+          },
+          "422": {
+            "description": "Hard Rejection (e.g., mismatch or fraud)"
+          }
+        }
+      }
+    },
+    "/v1/offers": {
+      "post": {
+        "summary": "Retrieve Credit Offers",
+        "description": "Passes aggregated bank and bureau data to the Decision Engine to fetch credit scoring tiers.",
+        "tags": [
+          "Decision Engine"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "userId",
+                  "cartValue",
+                  "bankData",
+                  "bureauData"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string"
+                  },
+                  "cartValue": {
+                    "type": "number"
+                  },
+                  "bankData": {
+                    "type": "object"
+                  },
+                  "bureauData": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Scoring complete, tiers retrieved"
+          },
+          "400": {
+            "description": "Missing input parameters"
+          }
+        }
+      }
+    },
+    "/v1/statement-upload": {
+      "post": {
+        "summary": "Bank Statement PDF Verification",
+        "description": "Upload a PDF bank statement for manual extraction and scoring when open banking APIs fail.",
+        "tags": [
+          "Decision Engine"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "Unique identifier for the user"
+                  },
+                  "statement": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "The PDF bank statement file"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bank statement parsed and scored successfully"
+          },
+          "400": {
+            "description": "Invalid file format or missing file"
+          },
+          "500": {
+            "description": "Failed to parse PDF"
+          }
+        }
+      }
+    },
+    "/v1/loans": {
+      "post": {
+        "summary": "Initiate Disbursement (Loan)",
+        "description": "Triggers a loan disbursement logic.",
+        "tags": [
+          "Payments"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "userId",
+                  "merchantId",
+                  "offerId",
+                  "principal",
+                  "interest",
+                  "tenor"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string"
+                  },
+                  "merchantId": {
+                    "type": "string"
+                  },
+                  "offerId": {
+                    "type": "string"
+                  },
+                  "principal": {
+                    "type": "number"
+                  },
+                  "interest": {
+                    "type": "number"
+                  },
+                  "tenor": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Loan successfully disbursed"
+          },
+          "400": {
+            "description": "Missing required loan parameters"
+          }
+        }
+      }
+    },
+    "/v1/repayments": {
+      "post": {
+        "summary": "Process Repayment",
+        "description": "Process a manual repayment via the Payment Processing service.",
+        "tags": [
+          "Payments"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "loanId",
+                  "amount",
+                  "paymentMethod",
+                  "transactionReference"
+                ],
+                "properties": {
+                  "loanId": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "number"
+                  },
+                  "paymentMethod": {
+                    "type": "string"
+                  },
+                  "transactionReference": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Repayment processed successfully"
+          }
+        }
+      }
+    },
+    "/v1/checkouts": {
+      "post": {
+        "summary": "Initiate Checkout",
+        "description": "Primary entry point for merchant checkouts. (Mapped to KYC/Orchestration)",
+        "tags": [
+          "Checkout"
+        ],
+        "responses": {
+          "200": {
+            "description": "Checkout session initiated"
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}

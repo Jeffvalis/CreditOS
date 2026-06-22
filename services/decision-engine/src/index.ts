@@ -1,5 +1,7 @@
 import express, { Request, Response } from 'express';
 import { performance } from 'perf_hooks';
+import multer from 'multer';
+import PDFParser from 'pdf2json';
 import { 
   OffersQuery, 
   OffersResponse, 
@@ -8,6 +10,7 @@ import {
 } from '@creditos/common';
 
 const app = express();
+const upload = multer({ storage: multer.memoryStorage() });
 const PORT = process.env.PORT || 8002;
 
 app.use(express.json());
@@ -276,6 +279,85 @@ app.get('/v1/offers', (req: Request<{}, {}, {}, OffersQuery>, res: Response) => 
   };
 
   return res.status(200).json(response);
+});
+
+// POST /v1/statement-upload - Bank Statement PDF Upload and Verification
+app.post('/v1/statement-upload', upload.single('statement'), (req: Request, res: Response) => {
+  const file = req.file;
+  const userId = req.body.userId || 'usr_unknown';
+
+  if (!file) {
+    return res.status(400).json({ success: false, error: 'No statement file uploaded.' });
+  }
+
+  if (file.mimetype !== 'application/pdf') {
+    return res.status(400).json({ success: false, error: 'File must be a PDF.' });
+  }
+
+  const pdfParser = new (PDFParser as any)(this, 1);
+
+  pdfParser.on('pdfParser_dataError', (errData: any) => {
+    console.error('[Decision-Engine] PDF Parsing Error:', errData.parserError);
+    return res.status(500).json({ success: false, error: 'Failed to parse PDF statement.' });
+  });
+
+  pdfParser.on('pdfParser_dataReady', () => {
+    const textContent = pdfParser.getRawTextContent().toLowerCase();
+    
+    // Fallback/Simulated extraction logic
+    let monthlyIncome = 50000;
+    let existingDebt = 0;
+
+    // Very naive regex simulation for portfolio demonstration
+    if (textContent.includes('salary') || textContent.includes('total deposits')) {
+      monthlyIncome = 250000;
+    }
+    if (textContent.includes('loan repayment') || textContent.includes('overdraft')) {
+      existingDebt = 50000;
+    }
+
+    console.log(`[Decision-Engine] Extracted from PDF - Income: ${monthlyIncome}, Debt: ${existingDebt}`);
+
+    // Construct mock open banking and bureau data based on PDF extraction
+    const payload: ScoreCalculationRequest = {
+      userId,
+      monoData: {
+        monthlyIncome,
+        monthlyExpenses: existingDebt + 20000,
+        averageBalance: monthlyIncome * 0.4,
+        gamblingTransactionsCount: 0,
+        failedDirectDebitsCount: 0
+      },
+      crcData: {
+        isBlacklisted: false,
+        hasDefaulted: false,
+        identityMatchScore: 95,
+        bureauScore: 720,
+        delinquentDays: 0,
+        activeLoansCount: existingDebt > 0 ? 1 : 0,
+        outstandingBalance: existingDebt
+      },
+      stabilityData: {
+        employmentTenureMonths: 24,
+        employmentType: 'SALARIED'
+      }
+    };
+
+    const result = calculateCreditScore(payload);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Bank statement parsed and scored successfully.',
+      extractedData: {
+        monthlyIncome,
+        existingDebt,
+      },
+      decision: result
+    });
+  });
+
+  // Load the PDF buffer for parsing
+  pdfParser.parseBuffer(file.buffer);
 });
 
 // Health check

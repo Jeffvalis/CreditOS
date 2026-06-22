@@ -33,8 +33,9 @@ The backend is composed of four strictly typed Node.js microservices, orchestrat
 3. **Payment Processing**: Manages disbursements and collections. Features a real integration interface with Paystack, including an interval-based `AutoDebitQueue` worker with a strict 3x retry policy for tokenized card debits, and HMAC-SHA256 Signed Webhook dispatchers.
 4. **Core Ledger & Loan**: The accounting heart of the system. Utilizes Prisma `$transaction` blocks and Prisma Client Extensions middleware to enforce strict immutability on Ledger database records.
 
-### Infrastructure:
+### Infrastructure & Frontends:
 - **API Gateway**: An Express-based reverse proxy (`http-proxy-middleware`) that intelligently routes frontend requests to the appropriate internal services.
+- **Developer Portal**: A sleek, modern React application built with Vite and Redocly, serving as the interactive OpenAPI documentation and portfolio showcase.
 - **Message Broker**: Redis Streams handles asynchronous domain events (`loan.created`, `loan.disbursed`) via Consumer Groups.
 - **Databases**: PostgreSQL clusters managed by Prisma ORM.
 - **Orchestration**: Fully containerized using a multi-stage Docker configuration and Docker Compose for one-click cluster spin-up.
@@ -52,7 +53,8 @@ The backend is composed of four strictly typed Node.js microservices, orchestrat
 
 1. **Initiate Checkout (`/v1/checkouts`)**: A user selects "Pay with CreditOS" at a merchant's checkout.
 2. **Identity Verification (`/v1/verify`)**: The user submits their BVN/NIN. The Identity service encrypts the data and checks for fraud signals (Hard Rejections).
-3. **Credit Scoring (`/v1/offers`)**: Open banking data (Mono/Okra) and Bureau data (CRC) are routed to the Decision Engine, which returns an instant risk tier and maximum loan limit.
+3. **Credit Scoring (`/v1/offers`)**: Open banking data (Mono/Okra) and Bureau data (CRC) are routed to the Decision Engine. 
+   - *Fallback Mechanism*: If open banking APIs fail, users can use the `multipart/form-data` endpoint (`/v1/statement-upload`) to upload a PDF Bank Statement. The engine parses the PDF in-memory to simulate extraction and return an instant risk tier.
 4. **Disbursement (`/api/disburse`)**: Upon acceptance, the Payment service triggers a transfer via Paystack to the merchant.
 5. **Event Bus & Ledger**: 
    - A `loan.disbursed` event is published to Redis.
@@ -75,11 +77,19 @@ docker-compose up --build -d
 Navigate to the Swagger UI to interact with the endpoints:
 - **http://localhost:8000/docs**
 
-### 3. Run the End-to-End Test
+### 3. Start the Developer Portal
+To view the custom API documentation UI:
+```bash
+cd apps/developer-portal
+npm run dev
+```
+Navigate to **http://localhost:5173/**.
+
+### 4. Run the End-to-End Test
 Execute the automated integration script to verify the entire lifecycle from KYC to Ledger insertion:
 ```bash
 npx ts-node test-e2e.ts
 ```
 
-### 4. Postman Collection
+### 5. Postman Collection
 Import the `Documentation/Lendr_Postman_Collection.json` into Postman to manually walk through the API flow with dynamic variables seamlessly mapped between requests.

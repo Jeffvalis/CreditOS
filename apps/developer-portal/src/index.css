@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff; /* Crisp white background */
+  color: #111827; /* Dark slate text */
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Redoc sets its own scrollbars and backgrounds but we ensure the body base is dark */

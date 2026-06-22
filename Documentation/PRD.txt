@@ -20,17 +20,16 @@ Product Name:
 REQUIREMENTS DOCUMENT 
  CREDIT OS (LENDR) — PRODUCT 
 ----------------Page (0) Break----------------
+3. Bank data aggregation (Automated via APIs or Manual via PDF Statement Uploads)
 4. Credit scoring 
-3. Bank data aggregation 
-2. Identity verification (BVN/NIN) 
-1. Customer selects “Buy with Lendr” 
+
  4. HIGH-LEVEL USER FLOW 
  
 “I want to control risk, monitor loans, and ensure compliance.” 
 Lendr Ops 
 “I want to split payments easily without stress or leaving checkout.” 
 Borrower 
-“I want to embed a credit option so I can increase sales.” 
+“I want to embed a credit option so I can increase sales (Using the Developer Portal to integrate).” 
 Merchant 
  3. USER PERSONAS 
  

@@ -128,6 +128,36 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 
 /**
  * @swagger
+ * /v1/statement-upload:
+ *   post:
+ *     summary: Bank Statement PDF Verification
+ *     description: Upload a PDF bank statement for manual extraction and scoring when open banking APIs fail.
+ *     tags: [Decision Engine]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: Unique identifier for the user
+ *               statement:
+ *                 type: string
+ *                 format: binary
+ *                 description: The PDF bank statement file
+ *     responses:
+ *       200:
+ *         description: Bank statement parsed and scored successfully
+ *       400:
+ *         description: Invalid file format or missing file
+ *       500:
+ *         description: Failed to parse PDF
+ */
+
+/**
+ * @swagger
  * /v1/loans:
  *   post:
  *     summary: Initiate Disbursement (Loan)
@@ -232,7 +262,7 @@ app.use(
   createProxyMiddleware({
     target: DECISION_ENGINE_URL,
     changeOrigin: true,
-    pathFilter: (path) => path === '/v1/offers' || path === '/internal/calculate-score',
+    pathFilter: (path) => path === '/v1/offers' || path === '/v1/statement-upload' || path === '/internal/calculate-score',
   })
 );
 
