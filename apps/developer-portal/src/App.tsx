@@ -64,9 +64,8 @@ function App() {
                 fontSize: '14px',
                 fontFamily: '"Inter", sans-serif',
                 headings: {
-                  fontFamily: '"Inter", sans-serif',
-                  fontWeight: '600',
-                  color: '#111827',
+                    fontFamily: "\"Inter\", sans-serif",
+                    fontWeight: "600"
                 },
                 code: {
                   fontFamily: '"Fira Code", monospace',
