@@ -1,7 +1,7 @@
 # CreditOS (Lendr) - Technical Requirements Document (TRD)
 
 ## 1. Product Overview & Goal
-Build a plug-and-play API platform enabling merchants to offer instant, embedded credit at checkout. The system handles identity verification, bank data aggregation, real-time credit scoring (< 500ms), loan disbursement, repayments, and merchant webhooks.
+CreditOS is a plug-and-play API platform enabling merchants to offer instant, embedded credit at checkout. The system handles identity verification, bank data aggregation, real-time credit scoring (< 500ms), loan disbursement, repayments, and merchant webhooks.
 
 ## 2. Technical Specifications
 

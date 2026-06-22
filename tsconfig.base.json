@@ -2,8 +2,14 @@
   "compilerOptions": {
     "target": "es2022",
     "module": "commonjs",
-    "lib": ["es2022"],
-    "strict": true,
+    "lib": [
+      "es2022"
+    ],
+    "paths": {
+      "@creditos/common": [
+        "services/common/src"
+      ]
+    },
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

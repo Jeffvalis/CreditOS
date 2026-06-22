@@ -13,7 +13,9 @@
     "start:payment": "ts-node services/payment-processing/src/index.ts",
     "start:ledger": "ts-node services/core-ledger-loan/src/index.ts",
     "start:all": "concurrently \"npm run start:gateway\" \"npm run start:kyc\" \"npm run start:decision\" \"npm run start:payment\" \"npm run start:ledger\"",
-    "postinstall": "npx prisma generate --schema=services/identity-kyc/prisma/schema.prisma || true && npx prisma generate --schema=services/core-ledger-loan/prisma/schema.prisma || true"
+    "build-common": "npm --workspace @creditos/common run build",
+    "build": "npm run build-common && npm run build -w decision-engine && npm run build -w payment-processing && npm run build -w core-ledger-loan && tsc src/index.ts",
+    "postinstall": "npm run build-common && npx prisma generate --schema=services/identity-kyc/prisma/schema.prisma || true && npx prisma generate --schema=services/core-ledger-loan/prisma/schema.prisma || true"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
