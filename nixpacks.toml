@@ -1,0 +1,13 @@
+# Nixpacks configuration for Railway (free tier)
+
+# Install the system package required by Prisma (OpenSSL 1.1)
+[apt]
+packages = ["libssl1.1"]
+
+# Build phase – install npm deps and compile TypeScript
+[build]
+command = "npm ci && npm run build"
+
+# Start phase – run the whole monorepo
+[start]
+command = "npm run start:all"
